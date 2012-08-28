@@ -25,7 +25,7 @@ package yaml
 
 import (
 	"fmt"
-	. "github.com/xiam/gosexy"
+	"github.com/gosexy/sugar"
 	"launchpad.net/goyaml"
 	"os"
 	"strings"
@@ -35,13 +35,13 @@ const SEPARATOR = "/"
 
 type Yaml struct {
 	file   string
-	values *Tuple
+	values *sugar.Tuple
 }
 
 // Creates and returns a new YAML structure.
 func New() *Yaml {
 	yaml := &Yaml{}
-	yaml.values = &Tuple{}
+	yaml.values = &sugar.Tuple{}
 	return yaml
 }
 
@@ -84,7 +84,7 @@ func (y *Yaml) GetSequence(path string) []interface{} {
 //
 //	yaml.Get("foo.bar", "default")
 func (y *Yaml) Get(path string, defaultValue interface{}) interface{} {
-	var p Tuple
+	var p sugar.Tuple
 
 	path = strings.ToLower(path)
 
@@ -106,9 +106,9 @@ func (y *Yaml) Get(path string, defaultValue interface{}) interface{} {
 
 			if ok == true {
 				switch value.(type) {
-				case Tuple:
+				case sugar.Tuple:
 					{
-						p = value.(Tuple)
+						p = value.(sugar.Tuple)
 					}
 				default:
 					{
@@ -127,7 +127,7 @@ func (y *Yaml) Get(path string, defaultValue interface{}) interface{} {
 
 // Sets a YAML setting, use diagonals (/) to nest values inside values.
 func (y *Yaml) Set(path string, value interface{}) {
-	var p Tuple
+	var p sugar.Tuple
 
 	path = strings.ToLower(path)
 
@@ -148,27 +148,27 @@ func (y *Yaml) Set(path string, value interface{}) {
 			// Searching.
 			if ok == true {
 				switch current.(type) {
-				case Tuple:
+				case sugar.Tuple:
 					{
 						// Just skip.
 					}
 				default:
 					{
 						delete(p, chunks[i])
-						p[chunks[i]] = Tuple{}
+						p[chunks[i]] = sugar.Tuple{}
 					}
 				}
 			} else {
-				p[chunks[i]] = Tuple{}
+				p[chunks[i]] = sugar.Tuple{}
 			}
 
-			p = p[chunks[i]].(Tuple)
+			p = p[chunks[i]].(sugar.Tuple)
 		}
 	}
 
 }
 
-func (y *Yaml) mapValues(data interface{}, parent *Tuple) {
+func (y *Yaml) mapValues(data interface{}, parent *sugar.Tuple) {
 
 	var name string
 
@@ -198,7 +198,7 @@ func (y *Yaml) mapValues(data interface{}, parent *Tuple) {
 			}
 		case interface{}:
 			{
-				values := &Tuple{}
+				values := &sugar.Tuple{}
 				y.mapValues(value, values)
 				(*parent)[name] = *values
 			}
