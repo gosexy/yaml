@@ -86,20 +86,12 @@ func mapValues(data interface{}, parent *sugar.Tuple) {
 		name = strings.ToLower(to.String(key))
 
 		switch value.(type) {
-		case []interface{}:
-			(*parent)[name] = value.([]interface{})
-		case string:
-			(*parent)[name] = value.(string)
-		case int:
-			(*parent)[name] = value.(int)
-		case bool:
-			(*parent)[name] = value.(bool)
-		case float64:
-			(*parent)[name] = value.(float64)
-		case interface{}:
+		case map[interface{}]interface{}:
 			values := &sugar.Tuple{}
 			mapValues(value, values)
 			(*parent)[name] = *values
+		default:
+			(*parent)[name] = value
 		}
 
 	}
