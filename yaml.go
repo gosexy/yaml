@@ -26,223 +26,127 @@ package yaml
 import (
 	"fmt"
 	"github.com/gosexy/sugar"
+	"github.com/gosexy/to"
 	"launchpad.net/goyaml"
 	"os"
 	"strings"
 )
-
-const SEPARATOR = "/"
 
 type Yaml struct {
 	file   string
 	values *sugar.Tuple
 }
 
-// Creates and returns a new YAML structure.
+/* Creates and returns a YAML struct. */
 func New() *Yaml {
-	yaml := &Yaml{}
-	yaml.values = &sugar.Tuple{}
-	return yaml
+	self := &Yaml{}
+	self.values = &sugar.Tuple{}
+	return self
 }
 
-// Creates and returns a YAML structure from a file.
-func Open(file string) *Yaml {
-	yaml := New()
-	yaml.file = file
-	yaml.Read(yaml.file)
-	return yaml
-}
+/* Creates and returns a YAML struct, from a file. */
+func Open(file string) (*Yaml, error) {
+	var err error
 
-// Returns the string value of the YAML path or an empty string, if the path cannot be found.
-func (y *Yaml) GetString(path string) string {
-	return y.Get(path, "").(string)
-}
+	self := New()
 
-// Returns the integer value of the YAML path or 0, if the path cannot be found.
-func (y *Yaml) GetInt(path string) int {
-	return y.Get(path, 0).(int)
-}
+	_, err = os.Stat(file)
 
-// Returns the float value of the YAML path or 0.0, if the path cannot be found.
-func (y *Yaml) GetFloat(path string) float64 {
-	return y.Get(path, 0).(float64)
-}
-
-// Returns the boolean value of the YAML path or false, if the path cannot be found.
-func (y *Yaml) GetBool(path string) bool {
-	return y.Get(path, false).(bool)
-}
-
-// Returns the sequenced value of the YAML path or an empty sequence, if the path cannot be found.
-func (y *Yaml) GetSequence(path string) []interface{} {
-	return y.Get(path, nil).([]interface{})
-}
-
-// Returns a YAML setting (or defaultValue if the referred name does not exists). Read nested values by using a dot (.) between labels.
-//
-// Example:
-//
-//	yaml.Get("foo.bar", "default")
-func (y *Yaml) Get(path string, defaultValue interface{}) interface{} {
-	var p sugar.Tuple
-
-	path = strings.ToLower(path)
-
-	p = *y.values
-
-	chunks := strings.Split(path, SEPARATOR)
-
-	length := len(chunks)
-
-	for i := 0; i < length; i++ {
-
-		value, ok := p[chunks[i]]
-
-		if i+1 == length {
-			if ok {
-				return value
-			}
-		} else {
-
-			if ok == true {
-				switch value.(type) {
-				case sugar.Tuple:
-					{
-						p = value.(sugar.Tuple)
-					}
-				default:
-					{
-						return defaultValue
-					}
-				}
-			} else {
-				return defaultValue
-			}
-		}
-
+	if err != nil {
+		return nil, err
 	}
 
-	return defaultValue
-}
+	self.file = file
 
-// Sets a YAML setting, use diagonals (/) to nest values inside values.
-func (y *Yaml) Set(path string, value interface{}) {
-	var p sugar.Tuple
+	err = self.Read(self.file)
 
-	path = strings.ToLower(path)
-
-	p = *y.values
-
-	chunks := strings.Split(path, SEPARATOR)
-
-	length := len(chunks)
-
-	for i := 0; i < length; i++ {
-
-		current, ok := p[chunks[i]]
-
-		if i+1 == length {
-			delete(p, chunks[i])
-			p[chunks[i]] = value
-		} else {
-			// Searching.
-			if ok == true {
-				switch current.(type) {
-				case sugar.Tuple:
-					{
-						// Just skip.
-					}
-				default:
-					{
-						delete(p, chunks[i])
-						p[chunks[i]] = sugar.Tuple{}
-					}
-				}
-			} else {
-				p[chunks[i]] = sugar.Tuple{}
-			}
-
-			p = p[chunks[i]].(sugar.Tuple)
-		}
+	if err != nil {
+		return nil, err
 	}
 
+	return self, nil
 }
 
-func (y *Yaml) mapValues(data interface{}, parent *sugar.Tuple) {
+/* Sets a YAML setting */
+func (self *Yaml) Set(path string, value interface{}) error {
+	return self.values.Set(path, value)
+}
+
+/* Returns a YAML setting */
+func (self *Yaml) Get(path string) interface{} {
+	return self.values.Get(path)
+}
+
+func mapValues(data interface{}, parent *sugar.Tuple) {
 
 	var name string
 
 	for key, value := range data.(map[interface{}]interface{}) {
-		name = strings.ToLower(key.(string))
+
+		name = strings.ToLower(to.String(key))
 
 		switch value.(type) {
 		case []interface{}:
-			{
-				(*parent)[name] = value.([]interface{})
-			}
+			(*parent)[name] = value.([]interface{})
 		case string:
-			{
-				(*parent)[name] = value.(string)
-			}
+			(*parent)[name] = value.(string)
 		case int:
-			{
-				(*parent)[name] = value.(int)
-			}
+			(*parent)[name] = value.(int)
 		case bool:
-			{
-				(*parent)[name] = value.(bool)
-			}
+			(*parent)[name] = value.(bool)
 		case float64:
-			{
-				(*parent)[name] = value.(float64)
-			}
+			(*parent)[name] = value.(float64)
 		case interface{}:
-			{
-				values := &sugar.Tuple{}
-				y.mapValues(value, values)
-				(*parent)[name] = *values
-			}
+			values := &sugar.Tuple{}
+			mapValues(value, values)
+			(*parent)[name] = *values
 		}
 
 	}
 
 }
 
-// Saves changes made to the latest Open()'ed YAML file.
-func (y *Yaml) Save() {
-	if y.file != "" {
-		y.Write(y.file)
+/* Writes changes to the currently opened YAML file. */
+func (self *Yaml) Save() error {
+	if self.file != "" {
+		return self.Write(self.file)
 	} else {
-		panic(fmt.Errorf("No file specified."))
+		return fmt.Errorf("No file specified.")
 	}
+	return nil
 }
 
-// Writes the current YAML structure into an arbitrary file.
-func (y *Yaml) Write(filename string) {
+/* Writes the YAML struct into a file */
+func (self *Yaml) Write(filename string) error {
 
-	out, err := goyaml.Marshal(y.values)
+	out, err := goyaml.Marshal(self.values)
+
 	if err != nil {
-		panic(err)
+		return err
 	}
 
 	fp, err := os.Create(filename)
+
 	if err != nil {
-		panic(err)
+		return err
 	}
+
 	defer fp.Close()
 
 	fp.Write(out)
+
+	return nil
 }
 
-// Reads a YAML file and stores it into the current YAML structure.
-func (y *Yaml) Read(filename string) {
+/* Loads a YAML file. */
+func (self *Yaml) Read(filename string) error {
 	var err error
 	var data interface{}
 
 	fileinfo, err := os.Stat(filename)
 
 	if err != nil {
-		panic(err)
+		return err
 	}
 
 	filesize := fileinfo.Size()
@@ -250,7 +154,7 @@ func (y *Yaml) Read(filename string) {
 	fp, err := os.Open(filename)
 
 	if err != nil {
-		panic(err)
+		return err
 	}
 
 	defer fp.Close()
@@ -261,13 +165,10 @@ func (y *Yaml) Read(filename string) {
 	err = goyaml.Unmarshal(buf, &data)
 
 	if err == nil {
-
-		y.mapValues(data, y.values)
-
+		mapValues(data, self.values)
 	} else {
-
-		panic(err.Error())
-
+		return err
 	}
 
+	return nil
 }
