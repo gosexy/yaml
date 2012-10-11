@@ -1,23 +1,46 @@
 # gosexy/yaml
 
-This package is a wrapper of [goyaml](http://launchpad.net/goyaml) that provides methods for loading, reading and writing to and from [YAML](http://www.yaml.org/) formatted files.
+`gosexy/yaml` provides sugar methods for loading, reading and writing to and from [YAML](http://www.yaml.org/) formatted files.
+
+This package is a wrapper of [goyaml](http://launchpad.net/goyaml).
 
 ## Installation
 
-    $ go get github.com/gosexy/yaml
+```
+go get github.com/gosexy/yaml
+```
 
 ## Usage
 
 ```go
 package main
 
-import "github.com/gosexy/yaml"
+import (
+	"github.com/gosexy/yaml"
+	"github.com/gosexy/sugar"
+)
 
 func main() {
 	settings := yaml.New()
 	settings.Set("success", true)
+	settings.Set("nested/three", 1)
+	settings.Set("another/nested/three", sugar.List { 1, 2, 3 })
 	settings.Write("test.yaml")
 }
+```
+
+The above code would generate a test.yaml file like this:
+
+```yaml
+another:
+  nested:
+    three:
+    - 1
+    - 2
+    - 3
+success: true
+nested:
+  three: 1
 ```
 
 ## Documentation
