@@ -23,8 +23,8 @@ import (
 func main() {
 	settings := yaml.New()
 	settings.Set("success", true)
-	settings.Set("nested/three", 1)
-	settings.Set("another/nested/three", sugar.List { 1, 2, 3 })
+	settings.Set("nested/tree", 1)
+	settings.Set("another/nested/tree", sugar.List { 1, 2, 3 })
 	settings.Write("test.yaml")
 }
 ```
@@ -34,13 +34,13 @@ The above code would generate a `test.yaml` file like this:
 ```yaml
 another:
   nested:
-    three:
+    tree:
     - 1
     - 2
     - 3
 success: true
 nested:
-  three: 1
+  tree: 1
 ```
 
 ## Documentation

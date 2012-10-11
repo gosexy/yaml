@@ -1,9 +1,0 @@
-another:
-  nested:
-    three:
-    - 1
-    - 2
-    - 3
-success: true
-nested:
-  three: 1
