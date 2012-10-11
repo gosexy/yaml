@@ -29,7 +29,7 @@ func main() {
 }
 ```
 
-The above code would generate a test.yaml file like this:
+The above code would generate a `test.yaml` file like this:
 
 ```yaml
 another:
