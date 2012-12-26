@@ -34,13 +34,13 @@ import (
 
 type Yaml struct {
 	file   string
-	values *sugar.Tuple
+	values *sugar.Map
 }
 
 /* Creates and returns a YAML struct. */
 func New() *Yaml {
 	self := &Yaml{}
-	self.values = &sugar.Tuple{}
+	self.values = &sugar.Map{}
 	return self
 }
 
@@ -77,7 +77,7 @@ func (self *Yaml) Get(path string) interface{} {
 	return self.values.Get(path)
 }
 
-func mapValues(data interface{}, parent *sugar.Tuple) {
+func mapValues(data interface{}, parent *sugar.Map) {
 
 	var name string
 
@@ -87,7 +87,7 @@ func mapValues(data interface{}, parent *sugar.Tuple) {
 
 		switch value.(type) {
 		case map[interface{}]interface{}:
-			values := &sugar.Tuple{}
+			values := &sugar.Map{}
 			mapValues(value, values)
 			(*parent)[name] = *values
 		default:
