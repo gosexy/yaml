@@ -1,8 +1,9 @@
 # gosexy/yaml
 
-`gosexy/yaml` provides sugar methods for loading, reading and writing to and from [YAML](http://www.yaml.org/) formatted files.
+This package is a wrapper of [goyaml][2].
 
-This package is a wrapper of [goyaml](http://launchpad.net/goyaml).
+`gosexy/yaml` provides friendly methods for loading, reading and writing to and
+from [YAML][3] formatted files.
 
 ## Installation
 
@@ -12,24 +13,33 @@ go get github.com/gosexy/yaml
 
 ## Usage
 
+After installing, use the following import path.
+
+```
+import "github.com/gosexy/yaml"
+```
+
+Here's an example that creates a YAML file and writes some values on it:
+
 ```go
 package main
 
 import (
 	"github.com/gosexy/yaml"
-	"github.com/gosexy/sugar"
 )
 
 func main() {
 	settings := yaml.New()
+
 	settings.Set("success", true)
-	settings.Set("nested/tree", 1)
-	settings.Set("another/nested/tree", sugar.List { 1, 2, 3 })
+	settings.Set("nested", "tree", 1)
+	settings.Set("another", "nested", "tree", []int{1, 2, 3})
+
 	settings.Write("test.yaml")
 }
 ```
 
-The above code would generate a `test.yaml` file like this:
+The above code generates a `test.yaml` file like this:
 
 ```yaml
 another:
@@ -38,17 +48,76 @@ another:
     - 1
     - 2
     - 3
-success: true
 nested:
   tree: 1
+success: true
+```
+
+A detail of another example:
+
+```
+settings, err := yaml.Open("examples/input/settings.yaml")
+
+if err != nil {
+	log.Printf("Could not open YAML file: %s", err.Error())
+}
+
+s := to.String(settings.Get("test_string"))
+
+fmt.Printf("%s", s)
+```
+
+If the referred `settings.yaml` contains a line like this:
+
+```yaml
+test_string: "Hello World!"
+```
+
+The the output would be:
+
+```
+Hello World!
+```
+
+Note that you can use nested paths on `Set()` and `Get()`:
+
+```
+/*
+path:
+	to:
+		nested:
+			value: 1
+*/
+settings.Set("path", "to", "nested", "value", 1)
+
+// yaml.*Yaml.Get() returns interface{}.
+i := settings.Get("path", "to", "nested", "value")
+
+fmt.Printf("%d\n", i)
+// Prints: 1
+```
+
+You can also use [gosexy/to][4] to convert directly into an specific type:
+
+```
+// to.Int() returns int.
+i := to.Int(settings.Get("path", "to", "nested", "value"))
+
+fmt.Printf("%d\n", i)
+// 1 int
 ```
 
 ## Documentation
 
-You can read ``gosexy/yaml`` documentation from a terminal
+You can read `gosexy/yaml` documentation from a terminal
 
 ```
-$ go doc github.com/gosexy/yaml
+go doc github.com/gosexy/yaml
 ```
 
-Or you can [browse it](http://go.pkgdoc.org/github.com/gosexy/yaml) online.
+Or you can [browse it][1] on godoc.org.
+
+[1]: http://godoc.org/github.com/gosexy/yaml
+[2]: http://launchpad.net/goyaml
+[3]: http://www.yaml.org
+[4]: https://github.com/gosexy/to
