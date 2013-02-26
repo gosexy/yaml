@@ -5,6 +5,8 @@ This package is a wrapper of [goyaml][2].
 `gosexy/yaml` provides friendly methods for loading, reading and writing to and
 from [YAML][3] formatted files.
 
+Useful if you just want to read/write setting files in your Go programs.
+
 ## Installation
 
 ```
@@ -97,7 +99,8 @@ fmt.Printf("%d\n", i)
 // Prints: 1
 ```
 
-You can also use [gosexy/to][4] to convert directly into an specific type:
+You can also use [gosexy/to][4] to convert from `interface{}` into a compatible
+type:
 
 ```go
 // to.Int() returns int.
