@@ -55,7 +55,7 @@ success: true
 
 A detail of another example:
 
-```
+```go
 settings, err := yaml.Open("examples/input/settings.yaml")
 
 if err != nil {
@@ -81,7 +81,7 @@ Hello World!
 
 Note that you can use nested paths on `Set()` and `Get()`:
 
-```
+```go
 /*
 path:
 	to:
@@ -99,7 +99,7 @@ fmt.Printf("%d\n", i)
 
 You can also use [gosexy/to][4] to convert directly into an specific type:
 
-```
+```go
 // to.Int() returns int.
 i := to.Int(settings.Get("path", "to", "nested", "value"))
 
