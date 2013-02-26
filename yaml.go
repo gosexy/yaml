@@ -25,26 +25,36 @@ package yaml
 
 import (
 	"fmt"
-	"github.com/gosexy/sugar"
-	"github.com/gosexy/to"
+	"github.com/gosexy/dig"
 	"launchpad.net/goyaml"
+	"log"
 	"os"
+	"reflect"
 	"strings"
 )
 
 type Yaml struct {
 	file   string
-	values *sugar.Map
+	values map[string]interface{}
 }
 
-/* Creates and returns a YAML struct. */
+/*
+	true by default, for now.
+*/
+var Compat = true
+
+/*
+	Creates and returns a YAML struct.
+*/
 func New() *Yaml {
 	self := &Yaml{}
-	self.values = &sugar.Map{}
+	self.values = map[string]interface{}{}
 	return self
 }
 
-/* Creates and returns a YAML struct, from a file. */
+/*
+	Creates and returns a YAML struct, from a file.
+*/
 func Open(file string) (*Yaml, error) {
 	var err error
 
@@ -67,38 +77,83 @@ func Open(file string) (*Yaml, error) {
 	return self, nil
 }
 
-/* Sets a YAML setting */
-func (self *Yaml) Set(path string, value interface{}) error {
-	return self.values.Set(path, value)
-}
+/*
+	Sets a YAML setting
+*/
+func (self *Yaml) Set(params ...interface{}) error {
 
-/* Returns a YAML setting */
-func (self *Yaml) Get(path string) interface{} {
-	return self.values.Get(path)
-}
+	l := len(params)
 
-func mapValues(data interface{}, parent *sugar.Map) {
-
-	var name string
-
-	for key, value := range data.(map[interface{}]interface{}) {
-
-		name = strings.ToLower(to.String(key))
-
-		switch value.(type) {
-		case map[interface{}]interface{}:
-			values := &sugar.Map{}
-			mapValues(value, values)
-			(*parent)[name] = *values
-		default:
-			(*parent)[name] = value
-		}
-
+	if l < 2 {
+		return fmt.Errorf("Missing value.")
 	}
 
+	if Compat == true {
+		if len(params) == 2 {
+			if reflect.TypeOf(params[0]).Kind() == reflect.String {
+				p := params[0].(string)
+
+				if strings.Contains(p, "/") == true {
+					p := strings.Split(p, "/")
+
+					value := params[1]
+					route := make([]interface{}, len(p))
+
+					for i, _ := range p {
+						route[i] = p[i]
+					}
+
+					log.Printf(`Using a route separated by "/" is deprecated, please use yaml.*Yaml.Get("%s") instead.`, strings.Join(p, `", "`))
+
+					dig.Dig(&self.values, route...)
+					return dig.Set(&self.values, value, route...)
+				}
+			}
+		}
+	}
+
+	route := params[0 : l-1]
+	value := params[l-1]
+
+	dig.Dig(&self.values, route...)
+	return dig.Set(&self.values, value, route...)
 }
 
-/* Writes changes to the currently opened YAML file. */
+/*
+	Returns a YAML setting
+*/
+func (self *Yaml) Get(route ...interface{}) interface{} {
+	var i interface{}
+
+	if Compat == true {
+		// Compatibility should be removed soon.
+		if len(route) == 1 {
+			p := route[0].(string)
+
+			if strings.Contains(p, "/") == true {
+				p := strings.Split(p, "/")
+
+				route := make([]interface{}, len(p))
+
+				for i, _ := range p {
+					route[i] = p[i]
+				}
+
+				log.Printf(`Using a route separated by "/" is deprecated, please use yaml.*Yaml.Get("%s") instead.`, strings.Join(p, `", "`))
+
+				dig.Get(&self.values, &i, route...)
+				return i
+			}
+		}
+	}
+
+	dig.Get(&self.values, &i, route...)
+	return i
+}
+
+/*
+	Writes changes to the currently opened YAML file.
+*/
 func (self *Yaml) Save() error {
 	if self.file != "" {
 		return self.Write(self.file)
@@ -108,7 +163,9 @@ func (self *Yaml) Save() error {
 	return nil
 }
 
-/* Writes the YAML struct into a file */
+/*
+	Writes the current YAML struct to disk.
+*/
 func (self *Yaml) Write(filename string) error {
 
 	out, err := goyaml.Marshal(self.values)
@@ -125,15 +182,16 @@ func (self *Yaml) Write(filename string) error {
 
 	defer fp.Close()
 
-	fp.Write(out)
+	_, err = fp.Write(out)
 
-	return nil
+	return err
 }
 
-/* Loads a YAML file. */
+/*
+	Loads a YAML file from disk.
+*/
 func (self *Yaml) Read(filename string) error {
 	var err error
-	var data interface{}
 
 	fileinfo, err := os.Stat(filename)
 
@@ -154,11 +212,9 @@ func (self *Yaml) Read(filename string) error {
 	buf := make([]byte, filesize)
 	fp.Read(buf)
 
-	err = goyaml.Unmarshal(buf, &data)
+	err = goyaml.Unmarshal(buf, &self.values)
 
-	if err == nil {
-		mapValues(data, self.values)
-	} else {
+	if err != nil {
 		return err
 	}
 
