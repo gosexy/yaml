@@ -17,7 +17,7 @@ go get github.com/gosexy/yaml
 
 After installing, use the following import path.
 
-```
+```go
 import "github.com/gosexy/yaml"
 ```
 
@@ -107,7 +107,7 @@ type:
 i := to.Int(settings.Get("path", "to", "nested", "value"))
 
 fmt.Printf("%d\n", i)
-// 1 int
+// Prints: 1
 ```
 
 ## Documentation
