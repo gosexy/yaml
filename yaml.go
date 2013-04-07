@@ -25,9 +25,9 @@ package yaml
 
 import (
 	"fmt"
-	"github.com/gosexy/dig"
 	"launchpad.net/goyaml"
 	"log"
+	"menteslibres.net/gosexy/dig"
 	"os"
 	"reflect"
 	"strings"
@@ -41,7 +41,7 @@ type Yaml struct {
 /*
 	true by default, for now.
 */
-var Compat = true
+var Compat = false
 
 /*
 	Creates and returns a YAML struct.
