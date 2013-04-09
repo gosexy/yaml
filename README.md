@@ -103,8 +103,8 @@ You can also use [gosexy/to][4] to convert from `interface{}` into a compatible
 type:
 
 ```go
-// to.Int() returns int.
-i := to.Int(settings.Get("path", "to", "nested", "value"))
+// to.Int64() returns int64.
+i := to.Int64(settings.Get("path", "to", "nested", "value"))
 
 fmt.Printf("%d\n", i)
 // Prints: 1
@@ -112,13 +112,7 @@ fmt.Printf("%d\n", i)
 
 ## Documentation
 
-You can read `gosexy/yaml` documentation from a terminal
-
-```
-go doc menteslibres.net/gosexy/yaml
-```
-
-Or you can [browse it][1] on godoc.org.
+See the [online docs][1].
 
 [1]: http://godoc.org/menteslibres.net/gosexy/yaml
 [2]: http://launchpad.net/goyaml
