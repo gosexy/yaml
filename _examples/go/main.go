@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/gosexy/yaml"
+	"menteslibres.net/gosexy/yaml"
 )
 
 func main() {
