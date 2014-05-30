@@ -25,7 +25,7 @@ package yaml
 
 import (
 	"fmt"
-	"launchpad.net/goyaml"
+	"gopkg.in/yaml.v1"
 	"log"
 	"menteslibres.net/gosexy/dig"
 	"os"
@@ -168,7 +168,7 @@ func (self *Yaml) Save() error {
 */
 func (self *Yaml) Write(filename string) error {
 
-	out, err := goyaml.Marshal(self.values)
+	out, err := yaml.Marshal(self.values)
 
 	if err != nil {
 		return err
@@ -212,7 +212,7 @@ func (self *Yaml) Read(filename string) error {
 	buf := make([]byte, filesize)
 	fp.Read(buf)
 
-	err = goyaml.Unmarshal(buf, &self.values)
+	err = yaml.Unmarshal(buf, &self.values)
 
 	if err != nil {
 		return err
