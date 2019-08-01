@@ -1,7 +1,7 @@
 package yaml
 
 import (
-	"menteslibres.net/gosexy/to"
+	"github.com/gosexy/to"
 	"testing"
 )
 

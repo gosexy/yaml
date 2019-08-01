@@ -27,7 +27,7 @@ import (
 	"fmt"
 	"gopkg.in/yaml.v1"
 	"log"
-	"menteslibres.net/gosexy/dig"
+	"github.com/gosexy/dig"
 	"os"
 	"reflect"
 	"strings"
